@@ -54,6 +54,8 @@ window.pollingPeriod = 1000;
 window.updatePeriod  = 250;
 window.lastData = null;
 window.lastUpdate;
+window.timeOffset = null; // time offset between server and local clock
+
 
 $(function(){
 
@@ -161,6 +163,7 @@ function checkProgress(createStatusBars){
 
             var d = new Date();
             window.lastUpdate = d.getTime();
+            window.timeOffset = window.lastUpdate/1000 - data.stage.curTime;
             window.lastData = data;
 
             updateDisplay(data);
@@ -170,7 +173,7 @@ function checkProgress(createStatusBars){
         }); 
     } else {
         var data = $.extend({},window.lastData);
-        data.stage.completeItems = Math.min((data.stage.completeItems + Math.floor(((new Date().getTime()/1000)-data.stage.curTime)*data.stage.rate*0.5)), data.stage.totalItems);
+        data.stage.completeItems = Math.min((window.lastData.stage.completeItems + Math.floor(((new Date().getTime()/1000)-data.stage.curTime-window.timeOffset)*data.stage.rate*(window.updatePeriod/1000))), data.stage.totalItems);
         data.stage.pcComplete = Math.min(((data.stage.completeItems)/data.stage.totalItems),1);
         data.stage.timeRemaining = (data.stage.totalItems - data.stage.completeItems)/data.stage.rate;
         updateDisplay(data);
